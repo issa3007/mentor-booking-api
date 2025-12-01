@@ -19,11 +19,11 @@ export class CreateSessionDto {
 
   @IsDateString()
   @IsNotEmpty()
-  startTime: string;
+  startTime: Date;
 
   @IsDateString()
   @IsNotEmpty()
-  endTime: string;
+  endTime: Date;
 
   @IsEnum(SessionStatus)
   @IsOptional()
