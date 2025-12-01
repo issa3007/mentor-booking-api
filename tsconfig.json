@@ -11,15 +11,12 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
-
     "skipLibCheck": true,
-
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
     "strictBindCallApply": true,
     "strictPropertyInitialization": false,
-
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true
   },

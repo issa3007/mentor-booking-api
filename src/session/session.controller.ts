@@ -1,34 +1,39 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { SessionService } from './session.service';
+import {
+  Controller,
+  Post,
+  Get,
+  Param,
+  Body,
+  Query,
+  UseGuards,
+  ParseIntPipe,
+} from '@nestjs/common';
+import { SessionsService } from 'src/session/session.service';
 import { CreateSessionDto } from './dto/create-session.dto';
-import { UpdateSessionDto } from './dto/update-session.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/guards/roles.decorator';
+import { GetUser } from 'src/auth/guards/get-user.decorator';
+import { User } from 'src/user/entities/user.entity';
 
-@Controller('session')
-export class SessionController {
-  constructor(private readonly sessionService: SessionService) {}
+@Controller('sessions')
+@UseGuards(JwtAuthGuard, RolesGuard)
+export class SessionsController {
+  constructor(private readonly sessionsService: SessionsService) {}
 
+  @Roles('STUDENT')
   @Post()
-  create(@Body() createSessionDto: CreateSessionDto) {
-    return this.sessionService.create(createSessionDto);
+  create(@GetUser() user: User, @Body() data: CreateSessionDto) {
+    return this.sessionsService.createSession(user.id, data);
   }
 
-  @Get()
-  findAll() {
-    return this.sessionService.findAll();
+  @Get('my')
+  getMySessions(@GetUser() user: User, @Query() query: any) {
+    return this.sessionsService.getMySessions(user.id, user.role, query);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.sessionService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSessionDto: UpdateSessionDto) {
-    return this.sessionService.update(+id, updateSessionDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.sessionService.remove(+id);
+  getOne(@GetUser() user: User, @Param('id', ParseIntPipe) id: number) {
+    return this.sessionsService.getOne(id, user.id);
   }
 }

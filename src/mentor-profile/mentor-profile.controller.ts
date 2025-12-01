@@ -1,34 +1,47 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Patch,
+  Get,
+  Query,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { MentorProfileService } from './mentor-profile.service';
 import { CreateMentorProfileDto } from './dto/create-mentor-profile.dto';
 import { UpdateMentorProfileDto } from './dto/update-mentor-profile.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/guards/roles.decorator';
+import { GetUser } from 'src/auth/guards/get-user.decorator';
+import { User } from 'src/user/entities/user.entity';
 
-@Controller('mentor-profile')
+@Controller('mentors')
 export class MentorProfileController {
-  constructor(private readonly mentorProfileService: MentorProfileService) {}
+  constructor(private readonly mentorService: MentorProfileService) {}
 
-  @Post()
-  create(@Body() createMentorProfileDto: CreateMentorProfileDto) {
-    return this.mentorProfileService.create(createMentorProfileDto);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('MENTOR')
+  @Post('profile')
+  createProfile(@GetUser() user: User, @Body() dto: CreateMentorProfileDto) {
+    return this.mentorService.createProfile(user.id, dto);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('MENTOR')
+  @Patch('profile')
+  updateProfile(@GetUser() user: User, @Body() dto: UpdateMentorProfileDto) {
+    return this.mentorService.updateProfile(user.id, dto);
   }
 
   @Get()
-  findAll() {
-    return this.mentorProfileService.findAll();
+  getAllMentors(@Query() query: any) {
+    return this.mentorService.getMentors(query);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.mentorProfileService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMentorProfileDto: UpdateMentorProfileDto) {
-    return this.mentorProfileService.update(+id, updateMentorProfileDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.mentorProfileService.remove(+id);
+  getMentor(@Param('id') id: number) {
+    return this.mentorService.getMentorById(id);
   }
 }
